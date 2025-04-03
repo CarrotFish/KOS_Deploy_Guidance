@@ -36,15 +36,15 @@
   cd kos
   cargo build
   ```
+## 安装kos-sim(官方提供的一个简易的仿真环境)
+- 使用pip安装kos-sim和pykos
+  ```bash
+  pip install kos-sim
+  ```
 - 进入Python环境查看是否安装完成
   ```bash
   python
   >>> import pykos
-  ```
-## 安装kos-sim(官方提供的一个简易的仿真环境)
-- 使用pip安装kos-sim
-  ```bash
-  pip install kos-sim
   ```
 - 尝试运行kos-sim
   ```bash
