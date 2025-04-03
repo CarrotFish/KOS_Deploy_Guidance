@@ -41,6 +41,10 @@
   ```bash
   pip install kos-sim
   ```
+- 安装指定版本的protobuf
+  ```bash
+  pip install protobuf==5.29.0
+  ```
 - 进入Python环境查看是否安装完成
   ```bash
   python
