@@ -8,7 +8,7 @@
 - 新建main.py
 - 将python环境调整为之前部署的Conda环境
 
-# 构建示例项目(旋转指定电机)
+# 构建示例项目(旋转指定电机并获取传感器值)
 ```python
 from pykos import KOS # 导入PyKOS
 import asyncio        # 导入asyncio异步库(PyKOS的远程调用基本都是通过异步IO实现的)
@@ -19,4 +19,7 @@ async with KOS(ip='localhost', port=50051) as kos:
   await kos.actuator.command_actuators([
     { 'actuator_id': 14, 'position': 90.0, "velocity": 100.0, "torque": 1.0 } # actuator_id为电机ID，position为目标位置(可选)，velocity为转速(可选)，torque为扭矩(可选)
   ])
+  # 获取imu传感器值
+  values = await kos.imu.get_imu_values()
+  print(values)
 ```
