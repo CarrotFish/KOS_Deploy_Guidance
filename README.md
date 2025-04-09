@@ -3,58 +3,21 @@
 
 [K-Scale 官网](https://www.kscale.dev/)
 
-# 环境配置(Windows)
-## 安装Visual Studio编译工具
-- 到[Visual Studio官网](https://visualstudio.com/)下载Visual Studio Installer
-- 打开Installer，安装“MSVC 生成工具(最新)”、“Windows SDK”、“CMAKE windows平台”、“Git工具”
-## 安装Anaconda
-到[Anaconda官网](https://anaconda.org/)下载安装Anaconda
-## 配置Conda虚拟环境
-- 打开 Anaconda Prompt
-- 创建本地环境
-  
-  ```bash
-  conda create -p 你的环境目录 python=3.12.9
-  ```
-  
-- 激活Conda环境
+# KOS系统简介
 
-  ```bash
-  conda activate 你的环境目录
-  ```
+K-Scale Operating System，是用于K-Scale机器人的操作系统，继承了对机器人底层硬件的处理、远程调用控制功能、仿真环境的系统。
 
-- 安装Rust，准备编译KOS Python工具包
+我们控制机器人，分为下面几步：
 
-  ```bash
-  conda install rust
-  ```
+- 在机器人侧的单片机上运行包含KOS软件包的Linux系统（烧录系统，接电会自动运行）。
+- 让电脑和单片机连接到同一个网络，并在电脑上通过IP地址与端口号连接单片机。
+- 在电脑上调用PyKOS提供的远程控制API，实现电机级控制与传感器原始数据读取。
+- 通过强化学习，训练控制模型，实现高等功能。
 
-- 使用Git下载KOS源码
-  ```bash
-  git clone https://github.com/kscalelabs/kos.git
-  ```
+为了搭建能够运行我们代码的软件环境，需要以下步骤
 
-- 编译KOS源码
-  ```bash
-  cd kos
-  cargo build
-  ```
-## 安装kos-sim(官方提供的一个简易的仿真环境)
-- 使用pip安装kos-sim和pykos
-  ```bash
-  pip install kos-sim
-  ```
-- 安装指定版本的protobuf
-  ```bash
-  pip install protobuf==5.29.0
-  ```
-- 进入Python环境查看是否安装完成
-  ```bash
-  python
-  >>> import pykos
-  ```
-- 尝试运行kos-sim
-  ```bash
-  kos-sim kbot-v1
-  ```
-- 如果需要，可用从[官方仓库](https://github.com/kscalelabs/kos-sim)下载示例代码
+## 配置电脑端开发环境
+见 intallation.md
+
+## PyKOS API使用
+见 pyKOS.md
