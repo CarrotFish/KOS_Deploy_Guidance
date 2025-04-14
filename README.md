@@ -24,3 +24,6 @@ K-Scale Operating System，是用于K-Scale机器人的操作系统，继承了�
 
 ## PyKOS API使用
 见 [pyKOS.md](/documents/pyKOS.md)
+
+## KOS-SIM的相关问题
+见 [sim.md](/documents/sim.md)
