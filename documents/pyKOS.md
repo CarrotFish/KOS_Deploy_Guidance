@@ -15,4 +15,4 @@
 - 操作电机和传感器(或者调用ONNX模型)
 
 # 构建示例项目(旋转指定电机并获取传感器值)
-见 [test1](/code/pykos_examples/test1.pys)
+见 [test1](/code/pykos_examples/test1.py)
