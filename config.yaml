@@ -1,0 +1,6 @@
+# 机器人配置
+actuator:
+  host: "127.0.0.1"
+  port: 8000
+robot:
+  speed: 5.0
