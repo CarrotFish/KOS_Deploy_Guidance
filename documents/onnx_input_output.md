@@ -68,3 +68,6 @@ outputs = session.run(None, {input_name: dummy_input})
 print("模型输出:", outputs)
 
 ```
+
+# 确定具体的输入输出维度
+**需要和强化学习组讨论，确定tensor的维度和每一维度的物理意义**
