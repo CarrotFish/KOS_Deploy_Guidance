@@ -17,10 +17,10 @@ K-Scale Operating System，是用于K-Scale机器人的操作系统，继承了�
 为了搭建能够运行我们代码的软件环境，需要以下步骤
 
 ## 配置电脑端开发环境
-见 [intallation.md](/installation.md)
+见 [intallation.md](/documents/installation.md)
 
 ## 配置机器人端环境
-见 [robot.md](/robot.md)
+见 [robot.md](/documents/robot.md)
 
 ## PyKOS API使用
-见 [pyKOS.md](/pyKOS.md)
+见 [pyKOS.md](/documents/pyKOS.md)
