@@ -9,26 +9,26 @@
 
 # 机器人电机配置
 ## 电机编号烧录须知
-经过我们的真机测试，发现电机初始化ID为1，所以我们需要在 **运行应用之前** 将对应电机的ID烧录进电机的控制芯片。以下是电机编号对应表：
+经过我们的真机测试，发现电机初始化ID为1，所以我们需要在 **组装之前** 将对应电机的ID烧录进电机的控制芯片（最好用贴纸记录一下）。以下是电机编号对应表：
 
 | ID   | 英文代号     | 对应位置     |
 |------|-------------|-------------|
-| 11 | left_shoulder_yaw |  |
-| 12 | left_shouder_pitch |  |
-| 13 | left_elbow |  |
-| 21 | right_shoulder_yaw |  |
-| 22 | right_shoulder_pitch |  |
-| 23 | right_elbow |  |
-| 31 | left_hip_yaw |  |
-| 32 | left_hip_roll |  |
-| 33 | left_hip_pitch |  |
-| 34 | left_knee |  |
-| 35 | left_ankle |  |
-| 41 | right_hip_yaw |  |
-| 42 | right_hip_roll |  |
-| 43 | right_hip_pitch |  |
-| 44 | right_knee |  |
-| 45 | right_ankle |  |
+| 11 | left_shoulder_yaw | 左侧肩膀向两侧动的电机 |
+| 12 | left_shouder_pitch | 左侧肩膀前后动的电机 |
+| 13 | left_elbow | 左侧肘部 |
+| 21 | right_shoulder_yaw | 右侧肩膀向两侧动的电机 |
+| 22 | right_shoulder_pitch | 右侧肩膀前后动的电机 |
+| 23 | right_elbow | 右侧肘部 |
+| 31 | left_hip_yaw | 左侧髋部向两侧动的电机 |
+| 32 | left_hip_roll | 左侧髋部以纵向轴为中心转动的电机 |
+| 33 | left_hip_pitch | 左侧髋部前后动的电机 |
+| 34 | left_knee | 左侧膝盖电机 |
+| 35 | left_ankle | 左侧脚踝电机 |
+| 41 | right_hip_yaw | 右侧髋部向两侧动的电机 |
+| 42 | right_hip_roll | 右侧髋部以纵向轴为中心转动的电机 |
+| 43 | right_hip_pitch | 右侧髋部前后动的电机 |
+| 44 | right_knee | 右侧膝盖电机 |
+| 45 | right_ankle | 右侧脚踝电机 |
 
 ## 烧录步骤
 - 使用ssh命令连接开发办(以有线连接为例，初始密码为 milkv )
