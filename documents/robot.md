@@ -1,6 +1,7 @@
 # 机器人端系统烧录
 ## 下载系统镜像文件
-前往[官方仓库](https://gitlab.kscale.ai/zeroth-robotics/OpenLCH-buildroot/-/artifacts)下载最新版artifacts.zip，解压直到出现一个.zip文件(如果网站打不开，请在群里戳我们，我们会把文件传到群里)
+前往[官方仓库](https://gitlab.kscale.ai/zeroth-robotics/OpenLCH-buildroot/-/artifacts)下载最新版artifacts.zip，解压直到出现一个.img文件
+可以在此处下载[.tar.xz压缩包](https://ricacraft.com/Files/milkv-duos-sd-v0.7.1.tar.xz)
 
 ## 通过balenaEtcher烧录到SD卡
 - 安装[Etcher](https://etcher.balena.io)
