@@ -3,6 +3,10 @@
 
 [官方文档(actuator)](https://kscalelabs.github.io/api-docs/pykos/actuator.html)
 [官方文档(imu)](https://kscalelabs.github.io/api-docs/pykos/imu.html)
+[官方文档(sound)](https://kscalelabs.github.io/api-docs/pykos/sound.html)
+[官方文档(LED Matrix)](https://kscalelabs.github.io/api-docs/pykos/led_matrix.html)
+[官方文档(Inference)](https://kscalelabs.github.io/api-docs/pykos/inference.html)
+[官方文档(Process Manager)](https://kscalelabs.github.io/api-docs/pykos/process_manager.html)
 
 # 建立项目(以Visual Studio Code为例)
 - 打开项目文件夹

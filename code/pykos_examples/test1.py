@@ -37,7 +37,6 @@ async def main():
                 actuator_id=actuator_id,
                 torque_enabled=True,
             )
-
         # 将 13 号电机转动90度
         await kos.actuator.command_actuators([
             { 'actuator_id': 13, 'position': 90.0, "velocity": 100.0, "torque": 1.0 } # actuator_id为电机ID，position为目标位置(可选)，velocity为转速(可选)，torque为扭矩(可选)
