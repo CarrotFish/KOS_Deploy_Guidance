@@ -1,5 +1,6 @@
 # 简介
 本文将通过官方示例介绍一些pyKOS的基本用法
+能够调用的函数主要看 ***xxxServiceClient*** 部分
 
 [官方文档(actuator)](https://kscalelabs.github.io/api-docs/pykos/actuator.html)
 [官方文档(imu)](https://kscalelabs.github.io/api-docs/pykos/imu.html)
