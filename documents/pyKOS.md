@@ -1,7 +1,8 @@
 # 简介
 本文将通过官方示例介绍一些pyKOS的基本用法
 
-[官方文档](https://kscalelabs.github.io/api-docs/pykos/actuator.html)
+[官方文档(actuator)](https://kscalelabs.github.io/api-docs/pykos/actuator.html)
+[官方文档(imu)](https://kscalelabs.github.io/api-docs/pykos/imu.html)
 
 # 建立项目(以Visual Studio Code为例)
 - 打开项目文件夹
