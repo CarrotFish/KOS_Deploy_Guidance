@@ -22,3 +22,19 @@
 
 # 构建示例项目(旋转指定电机并获取传感器值)
 见 [test1](/code/pykos_examples/test1.py)
+
+# 使用better_utils构建pyKOS机器人项目
+## 下载库文件
+在本仓库下载[better_utils.py](/code/better_utils.py)并放入项目运行目录中
+## 导入库文件
+```python
+from better_utils import BetterKOS
+```
+## 使用BetterKOS类
+```python
+async def main():
+    async with BetterKOS('192.168.42.1') as kos:
+        kos.load_session('model_100.onnx')
+        input('press enter to continue')
+        await kos.loop()
+```
