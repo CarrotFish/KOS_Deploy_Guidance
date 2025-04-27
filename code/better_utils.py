@@ -24,14 +24,26 @@ ACTUATOR_MAPPING = {
     "left_hip_yaw": 31,
     "left_hip_roll": 32,
     "left_hip_pitch": 33,
-    "left_knee": 34,
-    "left_ankle": 35,
+    "left_knee_pitch": 34,
+    "left_ankle_pitch": 35,
     "right_hip_yaw": 41,
     "right_hip_roll": 42,
     "right_hip_pitch": 43,
-    "right_knee": 44,
-    "right_ankle": 45,
+    "right_knee_pitch": 44,
+    "right_ankle_pitch": 45,
 }
+MODEL_MAP = (
+                ACTUATOR_MAPPING['right_hip_pitch'],
+                ACTUATOR_MAPPING['left_hip_pitch'],
+                ACTUATOR_MAPPING['right_hip_yaw'],
+                ACTUATOR_MAPPING['left_hip_yaw'],
+                ACTUATOR_MAPPING['right_hip_roll'],
+                ACTUATOR_MAPPING['left_hip_roll'],
+                ACTUATOR_MAPPING['right_knee_pitch'],
+                ACTUATOR_MAPPING['left_knee_pitch'],
+                ACTUATOR_MAPPING['right_ankle_pitch'],
+                ACTUATOR_MAPPING['left_ankle_pitch']
+            )
 
 def transform_position(position:float)->float:
     position = position % 360
@@ -52,7 +64,7 @@ class BetterKOS(KOS):
     last_actions = np.zeros(10)
     last_time_second = -1
     phase: float = 0         # 步调相位/2pi
-    walk_speed: float = 0    # 步态速度 1.0=2pi/s
+    walk_speed: float = 0.1    # 步态速度 1.0=2pi/s
     move_commands = np.zeros(3)  # 移动控制[x, y, z]
     session: ort.InferenceSession
     def __init__(self, *args, **kwargs):
@@ -63,7 +75,9 @@ class BetterKOS(KOS):
         for actuator_id in ACTUATOR_MAPPING.values():
             await self.actuator.configure_actuator(
                 actuator_id=actuator_id,
-                torque_enabled=True
+                torque_enabled=True,
+                kp=20.0,
+                kd=0.5
             )
         print('正在初始化电机位置，请注意，当前电机位置会被设置为0')
         states = await self.actuator.get_actuators_state(list(ACTUATOR_MAPPING.values()))
@@ -78,11 +92,13 @@ class BetterKOS(KOS):
             'velocity': speed
         }])
     async def command_actuators(self, commands:list[ActuatorCommand]):
+        k = 1 if commands[0]['actuator_id']//10 == 4 else -1
         return await self.actuator.command_actuators([
             {
                 'actuator_id': command['actuator_id'],
-                'position': transform_position(command['position'] + self.source_positions[command['actuator_id']]),
-                'velocity': command.get('velocity', 10)
+                'position': transform_position(command['position']*k + self.source_positions[command['actuator_id']]),
+                'velocity': command.get('velocity', 20),
+                'torque': command.get('torque', 0.1)
             }
             for command in commands
         ])
@@ -124,33 +140,26 @@ class BetterKOS(KOS):
             ACTUATOR_MAPPING['right_ankle_pitch'],
             ACTUATOR_MAPPING['left_ankle_pitch']
         ])
-        dof_pos = [(state.position - self.source_positions[state.actuator_id])/180*math.pi for state in states.states]
-        dof_vel = [state.velocity/180*math.pi for state in states.states]
+        dof_pos = np.zeros(10)
+        dof_vel = np.zeros(10)
+        for state in states.states:
+            k = 1 if state.actuator_id//10 == 4 else -1
+            dof_pos[MODEL_MAP.index(state.actuator_id)] = k*(state.position - self.source_positions[state.actuator_id])/180*math.pi
+            dof_vel[MODEL_MAP.index(state.actuator_id)] = k*state.velocity/180*math.pi
         # 推理
         next_actions = onnx_inference(self.session, self.phase, self.move_commands, {
             'ang_vel': 1.0,
             'dof_pos': 1.0,
-            'dof_vel': 1.0,
-            'lin_vel': 1.0,
+            'dof_vel': 0.05,
+            'lin_vel': 2.0,
             'quat': 1.0
         }, dof_pos, dof_vel, self.last_actions, base_ang_vel, base_euler, np.zeros(10))
         # 叠加增量
         self.last_actions = next_actions
         # 移动电机
-        self.command_actuators([{
-            'actuator_id': (
-                ACTUATOR_MAPPING['right_hip_pitch'],
-                ACTUATOR_MAPPING['left_hip_pitch'],
-                ACTUATOR_MAPPING['right_hip_yaw'],
-                ACTUATOR_MAPPING['left_hip_yaw'],
-                ACTUATOR_MAPPING['right_hip_roll'],
-                ACTUATOR_MAPPING['left_hip_roll'],
-                ACTUATOR_MAPPING['right_knee_pitch'],
-                ACTUATOR_MAPPING['left_knee_pitch'],
-                ACTUATOR_MAPPING['right_ankle_pitch'],
-                ACTUATOR_MAPPING['left_ankle_pitch']
-            )[i],
-            'position': dof_pos[i] + next_actions[i]
+        await self.command_actuators([{
+            'actuator_id': MODEL_MAP[i],
+            'position': (dof_pos[i] + next_actions[i])*180/math.pi
         } for i in range(10)])
     
     async def loop(self, delta_time:float=0.05):
@@ -248,7 +257,8 @@ def onnx_inference(session:ort.InferenceSession, phase:float, commands:np.ndarra
     obs[39] = base_euler[1] * obs_scales["quat"]  # Pitch角（俯仰）
     obs[40] = base_euler[2] * obs_scales["quat"]  # Yaw角（偏航）
     # Reserved for future use(4)
-
+    print('[Inference Input]', obs)
     # 执行推理
     results = session.run(None, {'obs': [obs]})[0][0]
+    print('[Inference Output]', results)
     return results
