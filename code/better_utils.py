@@ -32,6 +32,10 @@ ACTUATOR_MAPPING = {
     "right_knee_pitch": 44,
     "right_ankle_pitch": 45,
 }
+ACTUATOR_WITH_WRONG_DIRECTION = [
+    # 34, 41, 42, 43, 45
+    31, 32, 33, 35, 44
+]
 MODEL_MAP = (
                 ACTUATOR_MAPPING['right_hip_pitch'],
                 ACTUATOR_MAPPING['left_hip_pitch'],
@@ -65,7 +69,7 @@ class BetterKOS(KOS):
     last_time_second = -1
     phase: float = 0         # 步调相位/2pi
     walk_speed: float = 0.1    # 步态速度 1.0=2pi/s
-    move_commands = np.zeros(3)  # 移动控制[x, y, z]
+    move_commands = np.array([0.0, 1.0, 0.0], dtype=np.float32)  # 移动控制[x, y, z]
     session: ort.InferenceSession
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -92,7 +96,7 @@ class BetterKOS(KOS):
             'velocity': speed
         }])
     async def command_actuators(self, commands:list[ActuatorCommand]):
-        k = 1 if commands[0]['actuator_id']//10 == 4 else -1
+        k = 1 if commands[0]['actuator_id'] not in ACTUATOR_WITH_WRONG_DIRECTION else -1
         return await self.actuator.command_actuators([
             {
                 'actuator_id': command['actuator_id'],
@@ -143,7 +147,7 @@ class BetterKOS(KOS):
         dof_pos = np.zeros(10)
         dof_vel = np.zeros(10)
         for state in states.states:
-            k = 1 if state.actuator_id//10 == 4 else -1
+            k = 1 if state.actuator_id not in ACTUATOR_WITH_WRONG_DIRECTION else -1
             dof_pos[MODEL_MAP.index(state.actuator_id)] = k*(state.position - self.source_positions[state.actuator_id])/180*math.pi
             dof_vel[MODEL_MAP.index(state.actuator_id)] = k*state.velocity/180*math.pi
         # 推理

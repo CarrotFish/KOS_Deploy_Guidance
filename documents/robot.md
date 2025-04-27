@@ -32,7 +32,7 @@
 | 45 | right_ankle | 右侧脚踝电机 |
 
 ## 烧录步骤
-- 使用ssh命令连接开发办(以有线连接为例，初始密码为 milkv )
+- 使用ssh命令连接开发板(以有线连接为例，初始密码为 milkv )
 ```bash
 ssh root@192.168.42.1
 ```
@@ -44,4 +44,32 @@ feetech_change_id 1 [对应ID]
 ```bash
 feetech_scan
 feetech_identify [测试电机ID]
+```
+
+# 连接Wi-Fi
+- 通过ssh连接开发板
+- 编辑 /etc/wpa_supplicant_khacks.conf 文件
+```bash
+vim /etc/wpa_supplicant_khacks.conf
+```
+按下键盘上的i键进入编辑模式
+- 将文件修改为以下内容
+```
+ctrl_interface=/var/run/wpa_supplicant
+ap_scan=1
+update_config=1
+
+network={
+    ssid="你的Wi-Fi名称"
+    psk="你的Wi-Fi密码"
+    key_mgmt=WPA-PSK
+    scan_ssid=1
+}
+```
+请注意，key_mgmt为Wi-Fi安全性参数，目前测试过的只有这个安全性，可以根据Wi-Fi路由器进行修改。scan_ssid=1仅需要在Wi-Fi为隐藏Wi-Fi时添加。
+- 保存并退出
+按下esc退出编辑模式，按下:进入命令模式，输入命令wq回车保存并退出。
+- 重启开发板
+```bash
+reboot
 ```
