@@ -1,3 +1,5 @@
+# 注意！本代码仍在调试阶段，建议按照documents中的audio_speaker.md进行测试！
+
 '''
 本代码包括：
 1.读取麦克风\扬声器
@@ -17,7 +19,7 @@ async def main():
     # async with KOS(ip='localhost', port=50051) as kos:# kos-sim端使用本行，将下一行注释
     async with KOS(ip='192.168.42.1', port=50051) as kos:
         # 2. 初始化SoundServiceClient
-        sound_client = SoundServiceClient(kos.channel)
+        sound_client = SoundServiceClient(kos._channel)
 
         # 检查目前设备情况
         info = await sound_client.get_audio_info()
