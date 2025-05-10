@@ -48,11 +48,20 @@ MODEL_MAP = (
                 ACTUATOR_MAPPING['right_ankle_pitch'],
                 ACTUATOR_MAPPING['left_ankle_pitch']
             )
+CONFIG = {
+    'actuator_speed': 20
+}
 
 def transform_position(position:float)->float:
     position = position % 360
     if position > 180:
         position = position - 360
+    return position
+def transform_position2(position:float)->float:
+    while position < -math.pi:
+        position += 2*math.pi
+    while position > math.pi:
+        position -= 2*math.pi
     return position
 
 class BetterKOS(KOS):
@@ -68,11 +77,17 @@ class BetterKOS(KOS):
     last_actions = np.zeros(10)
     last_time_second = -1
     phase: float = 0         # 步调相位/2pi
-    walk_speed: float = 0.1    # 步态速度 1.0=2pi/s
-    move_commands = np.array([0.0, 1.0, 0.0], dtype=np.float32)  # 移动控制[x, y, z]
+    walk_speed: float = 1/0.4    # 步态速度 1.0=2pi/s
+    move_commands = np.array([0.1, 0.0, 0.0], dtype=np.float32)  # 移动控制[x, y, z]
     session: ort.InferenceSession
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+    async def reset(self):
+        for actuator_id in ACTUATOR_MAPPING.values():
+            await self.command_actuators([{
+                'actuator_id': actuator_id,
+                'position': 0
+            }])
     async def init(self):
         # 初始化电机
         print('正在配置电机...')
@@ -101,7 +116,7 @@ class BetterKOS(KOS):
             {
                 'actuator_id': command['actuator_id'],
                 'position': transform_position(command['position']*k + self.source_positions[command['actuator_id']]),
-                'velocity': command.get('velocity', 20),
+                'velocity': command.get('velocity', 20*k),
                 'torque': command.get('torque', 0.1)
             }
             for command in commands
@@ -129,8 +144,10 @@ class BetterKOS(KOS):
         imu_euler_angles = await self.imu.get_euler_angles()
         imu_data = await self.imu.get_imu_values()
         imu_advanced_data = await self.imu.get_imu_advanced_values()
-        base_ang_vel = [imu_data.gyro_x/180*math.pi, imu_data.gyro_y/180*math.pi, imu_data.gyro_z/180*math.pi]
-        base_euler = [imu_euler_angles.roll/180*math.pi, imu_euler_angles.pitch/180*math.pi, imu_euler_angles.yaw/180*math.pi]
+        # base_ang_vel = [imu_data.gyro_x/180*math.pi, imu_data.gyro_y/180*math.pi, imu_data.gyro_z/180*math.pi]
+        # base_euler = [imu_euler_angles.roll/180*math.pi, imu_euler_angles.pitch/180*math.pi, imu_euler_angles.yaw/180*math.pi]
+        base_ang_vel = [-imu_data.gyro_z/180*math.pi, -imu_data.gyro_x/180*math.pi, imu_data.gyro_y/180*math.pi]
+        base_euler = [-imu_euler_angles.yaw/180*math.pi, -imu_euler_angles.roll/180*math.pi, imu_euler_angles.pitch/180*math.pi]
         # 获取关节位置和速度
         states = await self.actuator.get_actuators_state([
             ACTUATOR_MAPPING['right_hip_pitch'],
@@ -158,15 +175,18 @@ class BetterKOS(KOS):
             'lin_vel': 2.0,
             'quat': 1.0
         }, dof_pos, dof_vel, self.last_actions, base_ang_vel, base_euler, np.zeros(10))
+        for i in range(len(next_actions)):
+            next_actions[i] = transform_position2(next_actions[i])
         # 叠加增量
         self.last_actions = next_actions
         # 移动电机
         await self.command_actuators([{
             'actuator_id': MODEL_MAP[i],
-            'position': (dof_pos[i] + next_actions[i])*180/math.pi
-        } for i in range(10)])
+            'position': (dof_pos[i] + next_actions[i])*180/math.pi,
+            'velocity': (1 if next_actions[i]>0 else -1)*CONFIG['actuator_speed']
+        } for i in range(10) if MODEL_MAP[i] in (33, 43)])
     
-    async def loop(self, delta_time:float=0.05):
+    async def loop(self, delta_time:float=0.02):
         # 命令循环
         while True:
             await self.update()
