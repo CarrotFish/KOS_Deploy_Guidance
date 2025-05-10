@@ -49,7 +49,8 @@ MODEL_MAP = (
                 ACTUATOR_MAPPING['left_ankle_pitch']
             )
 CONFIG = {
-    'actuator_speed': 20
+    'actuator_speed': 20,
+    'actuator_torque': 0.1
 }
 
 def transform_position(position:float)->float:
@@ -83,11 +84,13 @@ class BetterKOS(KOS):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     async def reset(self):
+        cmds = []
         for actuator_id in ACTUATOR_MAPPING.values():
-            await self.command_actuators([{
+            cmds.append([{
                 'actuator_id': actuator_id,
                 'position': 0
             }])
+        await self.command_actuators(cmds)
     async def init(self):
         # 初始化电机
         print('正在配置电机...')
@@ -112,15 +115,21 @@ class BetterKOS(KOS):
         }])
     async def command_actuators(self, commands:list[ActuatorCommand]):
         k = 1 if commands[0]['actuator_id'] not in ACTUATOR_WITH_WRONG_DIRECTION else -1
-        return await self.actuator.command_actuators([
-            {
-                'actuator_id': command['actuator_id'],
+        ids = [i['actuator_id'] for i in commands]
+        states = await self.actuator.get_actuators_state(ids)
+        cmds = []
+        for state in states.states:
+            k = 1 if state.actuator_id not in ACTUATOR_WITH_WRONG_DIRECTION else -1
+            now_pos = transform_position(state.position-self.source_positions[state.actuator_id])*k
+            command = commands[ids.index(state.actuator_id)]
+            direction = 1 if command['position'] > now_pos else -1
+            cmds.append({
+                'actuator_id': state.actuator_id,
                 'position': transform_position(command['position']*k + self.source_positions[command['actuator_id']]),
-                'velocity': command.get('velocity', 20*k),
-                'torque': command.get('torque', 0.1)
-            }
-            for command in commands
-        ])
+                'velocity': command.get('velocity', CONFIG['actuator_speed']) * k * direction,
+                'torque': command.get('torque', CONFIG['actuator_torque'])
+            })
+        return await self.actuator.command_actuators(cmds)
     async def __aenter__(self):
         await super().__aenter__()
         await self.init()
@@ -165,7 +174,7 @@ class BetterKOS(KOS):
         dof_vel = np.zeros(10)
         for state in states.states:
             k = 1 if state.actuator_id not in ACTUATOR_WITH_WRONG_DIRECTION else -1
-            dof_pos[MODEL_MAP.index(state.actuator_id)] = k*(state.position - self.source_positions[state.actuator_id])/180*math.pi
+            dof_pos[MODEL_MAP.index(state.actuator_id)] = k*transform_position(state.position - self.source_positions[state.actuator_id])/180*math.pi
             dof_vel[MODEL_MAP.index(state.actuator_id)] = k*state.velocity/180*math.pi
         # 推理
         next_actions = onnx_inference(self.session, self.phase, self.move_commands, {
@@ -183,8 +192,9 @@ class BetterKOS(KOS):
         await self.command_actuators([{
             'actuator_id': MODEL_MAP[i],
             'position': (dof_pos[i] + next_actions[i])*180/math.pi,
-            'velocity': (1 if next_actions[i]>0 else -1)*CONFIG['actuator_speed']
-        } for i in range(10) if MODEL_MAP[i] in (33, 43)])
+            'velocity': CONFIG['actuator_speed']
+        # } for i in range(10) if MODEL_MAP[i] in (33, 43)])
+        } for i in range(10)])
     
     async def loop(self, delta_time:float=0.02):
         # 命令循环
